@@ -1,13 +1,17 @@
 %% load the data
 
-subject = ('Gait_0001_3');
+subject = ('Gait_0001_2');
 subjfile = [(subject),'.mat'];
 load(subjfile);
 
 R_data = load(subject);
-name = Gait_0001_3;
+name = Gait_0001_2;
 
-% store COP datat
+%% analyze anterior-posterior inclination angle: coordination = 1
+%  analyze medial-lateral incliantion angle: coordination = 2
+coordination = 2 ;% 1: anterior-posterior, 2: medial-lateral, 3: up and down
+
+%% store COP datat
 FP1_data = name.Force(1).COP;
 FP2_data = name.Force(2).COP;
 FP3_data = name.Force(3).COP;
@@ -76,7 +80,7 @@ RLMAL_position = find(strcmp( path, 'RLMAL'));
 
 
 %%
-coordination = 2 ;% 1: anterior-posterior, 2: medial-lateral, 3: up and down
+% 1: anterior-posterior, 2: medial-lateral, 3: up and down
 LPSI_data = name.Trajectories.Labeled.Data(LPSI_position,1:3,:);
 RPSI_data = name.Trajectories.Labeled.Data(RPSI_position,1:3,:);
 LASI_data = name.Trajectories.Labeled.Data(LASI_position,1:3,:);
@@ -115,8 +119,10 @@ LPSI = LPSI_data;
 RASI = RASI_data;
 RPSI = RPSI_data;
 
+% calculate the hip marker position
 [hip_center, L_hip_center, R_hip_center] = hip_markers(LASI, LPSI, RASI, RPSI);
 
+% store the position data from each marker
 L_shoulder  = LSHO_data;
 R_shoulder  = RSHO_data;
 L_elbow     = LELL_data;
@@ -163,7 +169,6 @@ COP_3 = COP_third_step;
 COP_4 = COP_forth_step;
 
 
-coordination = 1 ;% 1: anterior-posterior, 2: medial-lateral, 3: up and down
 values_1 = zeros(1,time);
 for i = 1:time
     values_1(1,i) = (COP_1(coordination,i)-COM(coordination,i))/(-(COM(3,i)));
@@ -278,28 +283,62 @@ plot(angle_4)
 hold on
 plot(total_step)
 
-%%
+%% find the maximum inclination angle for anterior, posterior and medial direction
 if BACK
-    stotal_step = normalize(total_step);
-    [Maxima,MaxIdx] = findpeaks(total_step(180:end),'MinPeakProminence',3);
-    mean_ante_inclina = mean(Maxima);
+    if coordination == 1
+        stotal_step = normalize(total_step);
+        [Maxima,MaxIdx] = findpeaks(total_step(180:end),'MinPeakProminence',2.5);
+        mean_ante_inclina = mean(Maxima);
 
-    stotal_step = normalize(total_step);
-    [Maxima,MaxIdx] = findpeaks(-total_step(180:end),'MinPeakProminence',3);
-    mean_poste_inclina = mean(Maxima);
+        stotal_step = normalize(total_step);
+        [Maxima,MaxIdx] = findpeaks(-total_step(180:end),'MinPeakHeight', 0, 'MinPeakProminence',1.1);
+        mean_poste_inclina = mean(Maxima);
+    end
+        
+    if coordination == 2
+        stotal_step = normalize(total_step);
+        [Maxima,MaxIdx] = findpeaks(total_step(180:end),'MinPeakProminence',2.5);
+        mean_Ml_inclina = mean(Maxima);
+
+        stotal_step = normalize(total_step);
+        [Maxima,MaxIdx] = findpeaks(-total_step(180:end),'MinPeakHeight', 0, 'MinPeakProminence',1.1);
+        mean_mL_inclina = mean(Maxima);
+        mean_ML_inclination = (mean_Ml_inclina + mean_mL_inclina) /2 ;
+    end
 end
 
 if FRONT
-    stotal_step = normalize(total_step);
-    [Maxima,MaxIdx] = findpeaks(total_step(180:end),'MinPeakProminence',3);
-    mean_poste_inclina = mean(Maxima);
+    if coordination == 1
+        stotal_step = normalize(total_step);
+        [Maxima,MaxIdx] = findpeaks(total_step(180:end),'MinPeakProminence',2.5);
+        mean_poste_inclina = mean(Maxima);
 
-    stotal_step = normalize(total_step);
-    [Maxima,MaxIdx] = findpeaks(-total_step(180:end),'MinPeakProminence',3);
-    mean_ante_inclina = mean(Maxima);
+        stotal_step = normalize(total_step);
+        [Maxima,MaxIdx] = findpeaks(-total_step(180:end),'MinPeakHeight', 0, 'MinPeakProminence',1.1);
+        mean_ante_inclina = mean(Maxima);
+    end
+    
+    if coordination ==2
+        stotal_step = normalize(total_step);
+        [Maxima,MaxIdx] = findpeaks(total_step(180:end),'MinPeakProminence',2.5);
+        mean_Ml_inclina = mean(Maxima);
+
+        stotal_step = normalize(total_step);
+        [Maxima,MaxIdx] = findpeaks(-total_step(180:end),'MinPeakHeight', 0, 'MinPeakProminence',1.1);
+        mean_mL_inclina = mean(Maxima);
+        mean_ML_inclination = (mean_Ml_inclina + mean_mL_inclina) /2 ;
+    end
+        
 end
 
-string = ['anterior inclinationa angle is ', num2str(mean_ante_inclina), ', posterior inclination angle is ', num2str(mean_poste_inclina)];
-disp(string)
+if coordination == 1
+    string = ['anterior inclinationa angle is ', num2str(mean_ante_inclina), ', posterior inclination angle is ', num2str(mean_poste_inclina) ];
+    disp(string)
+end
+
+if coordination == 2
+    string = ['medial inclination angle is ', num2str(mean_ML_inclination) ];
+    disp(string)
+end
 
 
