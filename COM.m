@@ -4,12 +4,12 @@ clear
 % Before calculate the COM, please go to line 38-55 to check whether there are missing markers. 
 %% load the data
 
-subject = ('Gait_0001_2');
+subject = ('S11_Gait_0001_06');
 subjfile = [(subject),'.mat'];
 load(subjfile);
 
 R_data = load(subject);
-name = Gait_0001_2;
+name = Gait_0001_06;
 
 % store COP data
 FP1_data = name.Force(1).COP;
