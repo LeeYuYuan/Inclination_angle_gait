@@ -6,7 +6,7 @@ R_hip_back = RPSI;
 
 y_front = L_hip_front - R_hip_front;
 Pelvis_width = sqrt(sum(y_front.^2));
-pelvis_width = mean(Pelvis_width);
+pelvis_width = nanmean(Pelvis_width);
 y_H = y_front./Pelvis_width; %normalisation
 
 M_back = 0.5*(R_hip_back + L_hip_back);
