@@ -1,15 +1,21 @@
 %% load the data
-
-subject = ('Gait_0001_2');
+%dir('C:\Users\a1003\OneDrive\桌面\Project_Review\sideward walking\inclinationa_angle\gait')
+addpath 'C:\Users\a1003\OneDrive\桌面\Project_Review\sideward walking\inclinationa_angle\gait'
+subject = ('R_Gait_0001_3');
 subjfile = [(subject),'.mat'];
 load(subjfile);
 
 R_data = load(subject);
-name = Gait_0001_2;
+name =Gait_0001_3;
+
+
 
 %% analyze anterior-posterior inclination angle: coordination = 1
 %  analyze medial-lateral incliantion angle: coordination = 2
-coordination = 2 ;% 1: anterior-posterior, 2: medial-lateral, 3: up and down
+coordination = 1 ;% 1: anterior-posterior, 2: medial-lateral, 3: up and down
+
+
+
 
 %% store COP datat
 FP1_data = name.Force(1).COP;
@@ -147,21 +153,21 @@ New_COM = COM_function(time, L_shoulder, R_shoulder, L_elbow, R_elbow, L_hand, R
 % before this step, please decide the step of the gait
 % create the vector of COP * COM
 COM =  New_COM;
-[ICr1, TOr1, ICr2 , TOr2, ICr3, ICl1 , TOl1, ICl2, TOl2, FRONT, BACK] = Split_gait(name, frq);
+[ICr1, TOr1, ICr2 , TOr2, ICr3, ICl1 , TOl1, ICl2, TOl2, FRONT, BACK, COP_first_step, COP_second_step, COP_third_step, COP_forth_step, F1, F2, F3] = Split_gait(name, frq);
 
-if BACK 
-    COP_first_step = FP6_xyz; 
-    COP_second_step = FP3_xyz;
-    COP_third_step = FP5_xyz; 
-    COP_forth_step = FP2_xyz;
-end
+%if BACK 
+%    COP_first_step = FP6_xyz; 
+%    COP_second_step = FP3_xyz;
+%    COP_third_step = FP5_xyz; 
+%    COP_forth_step = FP2_xyz;
+%end
 
-if FRONT 
-    COP_first_step = FP1_xyz; 
-    COP_second_step = FP4_xyz;
-    COP_third_step = FP2_xyz; 
-    COP_forth_step = FP6_xyz;
-end
+%if FRONT 
+%    COP_first_step = FP1_xyz; 
+%     COP_second_step = FP4_xyz;
+%    COP_third_step = FP2_xyz; 
+%    COP_forth_step = FP6_xyz;
+%end
 
 COP_1 = COP_first_step;
 COP_2 = COP_second_step;
@@ -207,31 +213,41 @@ angle_4 = atand(values_4);
 
 %% calculation of the COP during double stance phase: P1 * ( F1 / (F1 + F2) ) + P2 * ( F2 / (F1 + F2) )
 
+
+
 values_Fdouble = zeros(1,time);
 if BACK
+    %F1 = FP6_xyz_Force;
+    %F2 = FP3_xyz_Force;
+    %F3 = FP5_xyz_Force;
+
     for i = ICl1:TOr1
-        values_Fdouble(1,i) = (((COP_1(coordination,i)).*(FP6_xyz_Force(3,i))./(FP6_xyz_Force(3,i) + FP3_xyz_Force(3,i))) +  ((COP_2(coordination,i)).*(FP3_xyz_Force(3,i))./(FP6_xyz_Force(3,i) + FP3_xyz_Force(3,i)))-COM(coordination,i))/(-(COM(3,i)));
+        values_Fdouble(1,i) = (((COP_1(coordination,i)).*(F1(3,i))./(F1(3,i) + F2(3,i))) +  ((COP_2(coordination,i)).*(F2(3,i))./(F1(3,i) + F2(3,i)))-COM(coordination,i))/(-(COM(3,i)));
     end
     angle_first_double = atand(values_Fdouble);
 
-    values_Sdouble = zeros(1,time);
+values_Sdouble = zeros(1,time);
 
     for i = ICr2:TOl1
-        values_Sdouble(1,i) = (((COP_2(coordination,i)).*(FP3_xyz_Force(3,i))./(FP3_xyz_Force(3,i) + FP5_xyz_Force(3,i))) +  ((COP_3(coordination,i)).*(FP5_xyz_Force(3,i))./(FP3_xyz_Force(3,i) + FP5_xyz_Force(3,i)))-COM(coordination,i))/(-(COM(3,i)));
+        values_Sdouble(1,i) = (((COP_2(coordination,i)).*(F2(3,i))./(F2(3,i) + F3(3,i))) +  ((COP_3(coordination,i)).*(F3(3,i))./(F2(3,i) + F3(3,i)))-COM(coordination,i))/(-(COM(3,i)));
     end
     angle_second_double = atand(values_Sdouble);
 end
 
 if FRONT
+    %F1 = FP1_xyz_Force;
+    %F2 = FP4_xyz_Force;
+    %F3 = FP2_xyz_Force;
+
     for i = ICl1:TOr1
-        values_Fdouble(1,i) = (((COP_1(coordination,i)).*(FP1_xyz_Force(3,i))./(FP1_xyz_Force(3,i) + FP4_xyz_Force(3,i))) +  ((COP_2(coordination,i)).*(FP4_xyz_Force(3,i))./(FP1_xyz_Force(3,i) + FP4_xyz_Force(3,i)))-COM(coordination,i))/(-(COM(3,i)));
+        values_Fdouble(1,i) = (((COP_1(coordination,i)).*(F1(3,i))./(F1(3,i) + F2(3,i))) +  ((COP_2(coordination,i)).*(F2(3,i))./(F1(3,i) + F2(3,i)))-COM(coordination,i))/(-(COM(3,i)));
     end
     angle_first_double = atand(values_Fdouble);
 
     values_Sdouble = zeros(1,time);
 
     for i = ICr2:TOl1
-        values_Sdouble(1,i) = (((COP_2(coordination,i)).*(FP4_xyz_Force(3,i))./(FP4_xyz_Force(3,i) + FP2_xyz_Force(3,i))) +  ((COP_3(coordination,i)).*(FP2_xyz_Force(3,i))./(FP4_xyz_Force(3,i) + FP2_xyz_Force(3,i)))-COM(coordination,i))/(-(COM(3,i)));
+        values_Sdouble(1,i) = (((COP_2(coordination,i)).*(F2(3,i))./(F2(3,i) + F3(3,i))) +  ((COP_3(coordination,i)).*(F3(3,i))./(F2(3,i) + F3(3,i)))-COM(coordination,i))/(-(COM(3,i)));
     end
     angle_second_double = atand(values_Sdouble);
 end
@@ -248,7 +264,7 @@ end
 
 %first double stance
 for i = ICl1:TOr1
-    
+
     total_step(1,i) = angle_first_double(1,i);
 end
 
@@ -267,69 +283,132 @@ for i = (TOl1+1):(ICl2-21)
     total_step(1,i) = angle_3(1,i);
 end
 
-figure
+
+%figure
 
 plot(total_step)
 
-figure 
+%figure 
 
-plot(angle_1)
-hold on
-plot(angle_2)
-hold on
-plot(angle_3)
-hold on
-plot(angle_4)
-hold on
-plot(total_step)
+%plot(angle_1)
+%hold on
+%plot(angle_2)
+%hold on
+%plot(angle_3)
+%hold on
+%plot(angle_4)
+%hold on
+%plot(total_step)
+step_size_IA = zeros(3,2);
+step_size_IA(1,1) = abs(total_step(ICr1 + 3));
+step_size_IA(2,1) = abs(total_step(ICr2));
+step_size_IA(3,1) = abs(total_step(ICl1));
+
+step_size_poste_IA = zeros(2,2);
+
+step_size_poste_IA(1,1) = abs(total_step(TOr1+1));
+step_size_poste_IA(2,1) = abs(total_step(TOl1));
+
+
+%%
+path = name.Trajectories.Labeled.Labels;
+LCAL2_position = find(strcmp( path, 'LCAL2'));
+RCAL2_position = find(strcmp( path, 'RCAL2'));
+
+LCAL2_data = name.Trajectories.Labeled.Data(LCAL2_position,1:3,:);
+RCAL2_data = name.Trajectories.Labeled.Data(RCAL2_position,1:3,:);
+LCAL2_data_reshape = reshape(LCAL2_data, [3,time]);
+RCAL2_data_reshape = reshape(RCAL2_data, [3,time]);
+
+
+
+
+step_size_IA(1,2) = abs(LCAL2_data_reshape(coordination,ICr1 + 3) - RCAL2_data_reshape(coordination,ICr1 + 3));
+step_size_IA(2,2) = abs(LCAL2_data_reshape(coordination,ICr2) - RCAL2_data_reshape(coordination,ICr2));
+step_size_IA(3,2) = abs(LCAL2_data_reshape(coordination,ICl1) - RCAL2_data_reshape(coordination,ICl1));
+%step_sizes(4) = abs(LCAL2_data_reshape(1,ICl2) - RCAL2_data_reshape(1,ICl2));
+%step_size_IA
+%dlmwrite('step_size_ml_IA.csv',step_size_IA,'delimiter',',','-append')
+
+step_size_poste_IA(1,2) = abs(LCAL2_data_reshape(coordination,(ICr2)) - RCAL2_data_reshape(coordination,(ICr2)));
+step_size_poste_IA(2,2) = abs(LCAL2_data_reshape(coordination,(ICl1)) - RCAL2_data_reshape(coordination,(ICl1)));
+%step_size_poste_IA
+
+%dlmwrite('step_size_poste_IA_new.csv',step_size_poste_IA,'delimiter',',','-append')
+
+if coordination == 1
+    ending_point = max([ICr1, TOr1, ICr2 , ICl1 , TOl1, ICl2-21, TOl2]);
+    correlation = corrcoef(COM(1,1:ending_point), total_step(1:ending_point))
+    %dlmwrite('correlation_sagittal.csv',correlation(1,2),'delimiter',',','-append')
+end
+
+if coordination == 2
+    ending_point = max([ICr1, TOr1, ICr2 , ICl1 , TOl1, ICl2-21, TOl2]);
+    correlation = corrcoef(COM(2,1:ending_point), total_step(1:ending_point))
+    %dlmwrite('correlation_frontal.csv',correlation(1,2),'delimiter',',','-append')
+end
 
 %% find the maximum inclination angle for anterior, posterior and medial direction
+%{
 if BACK
     if coordination == 1
         stotal_step = normalize(total_step);
-        [Maxima,MaxIdx] = findpeaks(total_step(180:end),'MinPeakProminence',2.5);
+        [Maxima,MaxIdx] = findpeaks(total_step((ICl1-50):(ICl2-21)),'MinPeakProminence',2.5);
         mean_ante_inclina = mean(Maxima);
+        Maxima
 
         stotal_step = normalize(total_step);
-        [Maxima,MaxIdx] = findpeaks(-total_step(180:end),'MinPeakHeight', 0, 'MinPeakProminence',1.1);
+        [Maxima,MaxIdx] = findpeaks(-total_step((ICl1-10):ICl2-21),'MinPeakHeight', 0, 'MinPeakProminence',1.1);
         mean_poste_inclina = mean(Maxima);
+        Maxima
     end
         
     if coordination == 2
         stotal_step = normalize(total_step);
-        [Maxima,MaxIdx] = findpeaks(total_step(180:end),'MinPeakProminence',2.5);
+        [Maxima,MaxIdx] = findpeaks(total_step((ICl1-50):(ICl2-21)),'MinPeakHeight', 0, 'MinPeakProminence',1);
         mean_Ml_inclina = mean(Maxima);
+        Maxima
 
         stotal_step = normalize(total_step);
-        [Maxima,MaxIdx] = findpeaks(-total_step(180:end),'MinPeakHeight', 0, 'MinPeakProminence',1.1);
+        [Maxima,MaxIdx] = findpeaks(-total_step((ICl1-10):(ICl2-21)),'MinPeakHeight', 0, 'MinPeakProminence',1);
         mean_mL_inclina = mean(Maxima);
         mean_ML_inclination = (mean_Ml_inclina + mean_mL_inclina) /2 ;
+        Maxima
     end
 end
 
 if FRONT
     if coordination == 1
         stotal_step = normalize(total_step);
-        [Maxima,MaxIdx] = findpeaks(total_step(180:end),'MinPeakProminence',2.5);
+        [Maxima,MaxIdx] = findpeaks(total_step((ICl1-50):(ICl2-21)),'MinPeakProminence',2.5);
         mean_poste_inclina = mean(Maxima);
+        Maxima
 
         stotal_step = normalize(total_step);
-        [Maxima,MaxIdx] = findpeaks(-total_step(180:end),'MinPeakHeight', 0, 'MinPeakProminence',1.1);
+        [Maxima,MaxIdx] = findpeaks(-total_step((ICl1-10):(ICl2-21)),'MinPeakHeight', 0, 'MinPeakProminence',1.1);
         mean_ante_inclina = mean(Maxima);
+        Maxima
     end
     
     if coordination ==2
         stotal_step = normalize(total_step);
-        [Maxima,MaxIdx] = findpeaks(total_step(180:end),'MinPeakProminence',2.5);
+        [Maxima,MaxIdx] = findpeaks(total_step((ICl1-50):(ICl2-21)),'MinPeakHeight', 0, 'MinPeakProminence',1);
         mean_Ml_inclina = mean(Maxima);
+        Maxima
 
         stotal_step = normalize(total_step);
-        [Maxima,MaxIdx] = findpeaks(-total_step(180:end),'MinPeakHeight', 0, 'MinPeakProminence',1.1);
+        [Maxima,MaxIdx] = findpeaks(-total_step((ICl1-10):(ICl2-21)),'MinPeakHeight', 0, 'MinPeakProminence',1);
         mean_mL_inclina = mean(Maxima);
         mean_ML_inclination = (mean_Ml_inclina + mean_mL_inclina) /2 ;
+        Maxima
     end
         
 end
+
+figure
+findpeaks(total_step((ICl1-50):(ICl2-21)),'MinPeakHeight', 0, 'MinPeakProminence',1);
+figure
+findpeaks(-total_step((ICl1-10):(ICl2-21)),'MinPeakHeight', 0, 'MinPeakProminence',1);
 
 if coordination == 1
     string = ['anterior inclinationa angle is ', num2str(mean_ante_inclina), ', posterior inclination angle is ', num2str(mean_poste_inclina) ];
@@ -341,4 +420,7 @@ if coordination == 2
     disp(string)
 end
 
+%}
 
+%dlmwrite('ante_IA_data.csv',num2str(mean_ante_inclina),'delimiter','','-append')
+%dlmwrite('poste_IA_data.csv',num2str(mean_poste_inclina),'delimiter','','-append')
